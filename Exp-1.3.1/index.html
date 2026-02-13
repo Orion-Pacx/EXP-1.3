@@ -1,3 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>Advanced Product Dashboard</title>
+
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<style>
+body{
+margin:0;
+font-family:Segoe UI;
+background:#0f172a;
+color:white;
+}
+
+header{
+padding:20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:#111827;
+}
+
+header h1{
+margin:0;
+font-size:22px;
+}
+
+.cart-badge{
+background:#ef4444;
+padding:5px 10px;
+border-radius:20px;
+}
+
+.container{
+display:grid;
+grid-template-columns:3fr 1fr;
+gap:20px;
+padding:20px;
+}
+
+.controls{
+display:flex;
+gap:10px;
+margin-bottom:20px;
+}
+
+input,select{
+padding:8px;
+border-radius:6px;
+border:none;
+}
+
+.products{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+gap:20px;
+}
+
+.card{
+background:#1e293b;
+padding:15px;
+border-radius:12px;
+transition:0.3s;
+position:relative;
+}
+
+.card:hover{
+transform:translateY(-5px);
+background:#334155;
+}
+
+.discount{
+position:absolute;
+top:10px;
+right:10px;
+background:#22c55e;
+padding:4px 8px;
+border-radius:6px;
+font-size:12px;
+}
+
+.card button{
+margin-top:10px;
+width:100%;
+padding:8px;
+background:#3b82f6;
+border:none;
+color:white;
+cursor:pointer;
+border-radius:6px;
+}
+
+.cart{
+background:#111827;
+padding:20px;
+border-radius:12px;
+position:sticky;
+top:20px;
+height:fit-content;
+}
+
+.cart-item{
+background:#1f2937;
+padding:10px;
+margin-bottom:10px;
+border-radius:8px;
+}
+
+.cart-item input{
+width:50px;
+}
+
+.summary{
+margin-top:15px;
+border-top:1px solid #374151;
+padding-top:10px;
+}
+
+.checkout{
+background:#22c55e;
+margin-top:10px;
+padding:8px;
+width:100%;
+border:none;
+cursor:pointer;
+border-radius:6px;
+}
+</style>
+</head>
+
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+
+function App(){
+
+const categories=["All","Electronics","Clothing","Books","Accessories"];
+
 const generateProducts = () => {
 
 return [
@@ -32,3 +175,129 @@ return [
 
 ];
 };
+
+const [products]=React.useState(generateProducts());
+const [search,setSearch]=React.useState("");
+const [category,setCategory]=React.useState("All");
+const [sort,setSort]=React.useState("");
+const [cart,setCart]=React.useState(
+JSON.parse(localStorage.getItem("cart"))||[]
+);
+
+React.useEffect(()=>{
+localStorage.setItem("cart",JSON.stringify(cart));
+},[cart]);
+
+const filtered=React.useMemo(()=>{
+let data=[...products];
+
+if(search)
+data=data.filter(p=>p.name.toLowerCase().includes(search.toLowerCase()));
+
+if(category!=="All")
+data=data.filter(p=>p.category===category);
+
+if(sort==="low")
+data.sort((a,b)=>a.price-b.price);
+if(sort==="high")
+data.sort((a,b)=>b.price-a.price);
+
+return data;
+},[search,category,sort,products]);
+
+const addToCart=(product)=>{
+setCart(prev=>{
+const existing=prev.find(p=>p.id===product.id);
+if(existing)
+return prev.map(p=>p.id===product.id?{...p,qty:p.qty+1}:p);
+return [...prev,{...product,qty:1}];
+});
+};
+
+const updateQty=(id,qty)=>{
+if(qty<1)return;
+setCart(cart.map(p=>p.id===id?{...p,qty:parseInt(qty)}:p));
+};
+
+const remove=id=>setCart(cart.filter(p=>p.id!==id));
+const clearCart=()=>setCart([]);
+
+const subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);
+const tax=subtotal*0.18;
+const delivery=subtotal>2000?0:100;
+const total=subtotal+tax+delivery;
+
+return(
+<>
+<header>
+<h1>Advanced Store</h1>
+<div className="cart-badge">Cart: {cart.length}</div>
+</header>
+
+<div className="container">
+
+<div>
+<div className="controls">
+<input placeholder="Search..." onChange={e=>setSearch(e.target.value)}/>
+<select onChange={e=>setCategory(e.target.value)}>
+{categories.map(c=><option key={c}>{c}</option>)}
+</select>
+<select onChange={e=>setSort(e.target.value)}>
+<option value="">Sort</option>
+<option value="low">Price Low-High</option>
+<option value="high">Price High-Low</option>
+</select>
+</div>
+
+<div className="products">
+{filtered.map(p=>(
+<div key={p.id} className="card">
+{p.discount && <div className="discount">SALE</div>}
+<h3>{p.name}</h3>
+<p>{p.category}</p>
+<p>₹{p.price}</p>
+<p>{"⭐".repeat(p.rating)}</p>
+<button onClick={()=>addToCart(p)}>Add</button>
+</div>
+))}
+</div>
+</div>
+
+<div className="cart">
+<h2>Cart</h2>
+
+{cart.map(item=>(
+<div key={item.id} className="cart-item">
+<strong>{item.name}</strong>
+<p>{p.desc}</p>
+<p><strong>₹{p.price}</strong></p>
+<input type="number" value={item.qty}
+onChange={e=>updateQty(item.id,e.target.value)}/>
+<button onClick={()=>remove(item.id)}>Remove</button>
+</div>
+))}
+
+<div className="summary">
+<p>Subtotal: ₹{subtotal.toFixed(2)}</p>
+<p>Tax (18%): ₹{tax.toFixed(2)}</p>
+<p>Delivery: ₹{delivery}</p>
+<h3>Total: ₹{total.toFixed(2)}</h3>
+<button className="checkout" onClick={()=>alert("Checkout Successful!")}>
+Checkout
+</button>
+<button onClick={clearCart}>Clear Cart</button>
+</div>
+
+</div>
+
+</div>
+</>
+);
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+
+</script>
+
+</body>
+</html>
