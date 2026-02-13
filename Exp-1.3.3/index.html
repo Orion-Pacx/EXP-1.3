@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>EXP-1.3.3 | OOP Hierarchy System</title>
+
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<style>
+body{
+margin:0;
+font-family:Segoe UI;
+background:#0f172a;
+color:white;
+}
+
+header{
+padding:20px;
+background:#111827;
+display:flex;
+justify-content:space-between;
+}
+
+.container{
+display:grid;
+grid-template-columns:300px 1fr 350px;
+gap:20px;
+padding:20px;
+}
+
+.panel{
+background:#1e293b;
+padding:20px;
+border-radius:12px;
+}
+
+input,select{
+width:100%;
+padding:8px;
+margin-bottom:10px;
+border:none;
+border-radius:6px;
+}
+
+button{
+padding:8px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+background:#3b82f6;
+color:white;
+margin-right:5px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+gap:15px;
+}
+
+.card{
+padding:15px;
+border-radius:10px;
+position:relative;
+transition:0.3s;
+cursor:pointer;
+}
+
+.card:hover{
+transform:translateY(-5px);
+}
+
+.student{background:#1e40af;}
+.teacher{background:#7c2d12;}
+.admin{background:#065f46;}
+
+.badge{
+position:absolute;
+top:10px;
+right:10px;
+font-size:11px;
+background:black;
+padding:3px 8px;
+border-radius:20px;
+}
+
+.stats{
+display:flex;
+gap:10px;
+margin-bottom:10px;
+}
+
+.stat{
+flex:1;
+background:#111827;
+padding:10px;
+border-radius:8px;
+text-align:center;
+}
+
+.structure{
+font-family:monospace;
+font-size:13px;
+white-space:pre-line;
+}
+</style>
+</head>
+
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+
+/* ===== OOP HIERARCHY ===== */
+
+class Person{
+constructor(name,age){
+this.name=name;
+this.age=age;
+}
+introduce(){
+return `Hi, I'm ${this.name}`;
+}
+getAge(){
+return this.age;
+}
+static role(){
+return "Generic Person";
+}
+}
+
+class Student extends Person{
+constructor(name,age,marks){
+super(name,age);
+this.marks=marks;
+}
+introduce(){
+return `Student ${this.name}, Grade: ${this.getGrade()}`;
+}
+getGrade(){
+return this.marks>=75?"A":
+this.marks>=50?"B":"C";
+}
+static role(){return "Student";}
+}
+
+class Teacher extends Person{
+constructor(name,age,salary){
+super(name,age);
+this.salary=salary;
+}
+introduce(){
+return `Professor ${this.name}, Salary: ₹${this.salary}`;
+}
+calculateBonus(){
+return this.salary*0.1;
+}
+static role(){return "Teacher";}
+}
+
+class Admin extends Person{
+constructor(name,age,department){
+super(name,age);
+this.department=department;
+}
+introduce(){
+return `Admin ${this.name}, Dept: ${this.department}`;
+}
+static role(){return "Admin";}
+}
+
+/* ===== REACT APP ===== */
+
+function App(){
+
+const [people,setPeople]=React.useState([]);
+const [form,setForm]=React.useState({name:"",age:"",role:"Student",extra:""});
+const [selected,setSelected]=React.useState(null);
+const [filter,setFilter]=React.useState("");
+const [sort,setSort]=React.useState("");
+
+const addPerson=()=>{
+if(!form.name||!form.age||!form.extra) return alert("Fill all fields");
+
+let obj;
+
+if(form.role==="Student")
+obj=new Student(form.name,parseInt(form.age),parseInt(form.extra));
+
+if(form.role==="Teacher")
+obj=new Teacher(form.name,parseInt(form.age),parseInt(form.extra));
+
+if(form.role==="Admin")
+obj=new Admin(form.name,parseInt(form.age),form.extra);
+
+setPeople([...people,obj]);
+setForm({name:"",age:"",role:"Student",extra:""});
+};
+
+const remove=(index)=>{
+setPeople(people.filter((_,i)=>i!==index));
+};
+
+let filtered=[...people];
+
+if(filter) filtered=filtered.filter(p=>p.constructor.role()===filter);
+if(sort==="age") filtered.sort((a,b)=>a.age-b.age);
+
+const stats={
+total:people.length,
+students:people.filter(p=>p.constructor.role()==="Student").length,
+teachers:people.filter(p=>p.constructor.role()==="Teacher").length,
+admins:people.filter(p=>p.constructor.role()==="Admin").length
+};
+
+return(
+<>
+<header>
+<h2>Academic OOP Management System</h2>
+<div>Total: {stats.total}</div>
+</header>
+
+<div className="container">
+
+{/* LEFT PANEL */}
+<div className="panel">
+<h3>Add Person</h3>
+
+<input placeholder="Name"
+value={form.name}
+onChange={e=>setForm({...form,name:e.target.value})}/>
+
+<input type="number" placeholder="Age"
+value={form.age}
+onChange={e=>setForm({...form,age:e.target.value})}/>
+
+<select value={form.role}
+onChange={e=>setForm({...form,role:e.target.value})}>
+<option>Student</option>
+<option>Teacher</option>
+<option>Admin</option>
+</select>
+
+<input placeholder={
+form.role==="Student"?"Marks":
+form.role==="Teacher"?"Salary":
+"Department"}
+value={form.extra}
+onChange={e=>setForm({...form,extra:e.target.value})}
+/>
+
+<button onClick={addPerson}>Add</button>
+
+<hr/>
+
+<select onChange={e=>setFilter(e.target.value)}>
+<option value="">All Roles</option>
+<option>Student</option>
+<option>Teacher</option>
+<option>Admin</option>
+</select>
+
+<select onChange={e=>setSort(e.target.value)}>
+<option value="">Sort</option>
+<option value="age">By Age</option>
+</select>
+
+</div>
+
+{/* CENTER GRID */}
+<div className="panel">
+
+<div className="stats">
+<div className="stat">Students<br/>{stats.students}</div>
+<div className="stat">Teachers<br/>{stats.teachers}</div>
+<div className="stat">Admins<br/>{stats.admins}</div>
+</div>
+
+<div className="grid">
+{filtered.map((p,index)=>(
+<div key={index}
+className={`card ${p.constructor.role().toLowerCase()}`}
+onClick={()=>setSelected(p)}>
+
+<div className="badge">{p.constructor.role()}</div>
+
+<h4>{p.name}</h4>
+<p>Age: {p.age}</p>
+<p>{p.introduce()}</p>
+
+<button onClick={(e)=>{e.stopPropagation();remove(index);}}>
+Delete
+</button>
+
+</div>
+))}
+</div>
+</div>
+
+{/* RIGHT STRUCTURE PANEL */}
+<div className="panel">
+<h3>OOP Structure</h3>
+<div className="structure">
+{selected ? `
+Class: ${selected.constructor.role()}
+
+Hierarchy:
+Person
+ ├── Student
+ ├── Teacher
+ └── Admin
+
+Polymorphism:
+introduce() overridden per class
+
+Encapsulation:
+Private attributes via constructor
+
+Static Method:
+role()
+
+Getter Method:
+getAge()
+
+Dynamic Rendering:
+Objects stored & rendered polymorphically
+
+Selected Object Output:
+${selected.introduce()}
+` : "Click a card to view structure details."}
+</div>
+</div>
+
+</div>
+</>
+);
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+
+</script>
+</body>
+</html>
