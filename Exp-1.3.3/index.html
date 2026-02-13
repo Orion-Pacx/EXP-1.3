@@ -113,8 +113,6 @@ white-space:pre-line;
 
 <script type="text/babel">
 
-/* ===== OOP HIERARCHY ===== */
-
 class Person{
 constructor(name,age){
 this.name=name;
@@ -126,9 +124,7 @@ return `Hi, I'm ${this.name}`;
 getAge(){
 return this.age;
 }
-static role(){
-return "Generic Person";
-}
+static role(){return "Generic";}
 }
 
 class Student extends Person{
@@ -171,11 +167,23 @@ return `Admin ${this.name}, Dept: ${this.department}`;
 static role(){return "Admin";}
 }
 
-/* ===== REACT APP ===== */
-
 function App(){
 
-const [people,setPeople]=React.useState([]);
+// ✅ PRE-EXISTING DATA (10 OBJECTS)
+const initialData=[
+new Student("Arjun Mehta",20,82),
+new Student("Sneha Kapoor",19,67),
+new Student("Rohan Das",21,45),
+new Teacher("Dr. Sharma",45,85000),
+new Teacher("Prof. Iyer",50,92000),
+new Teacher("Dr. Nair",39,78000),
+new Admin("Kavita Rao",35,"Examinations"),
+new Admin("Rahul Verma",41,"Admissions"),
+new Student("Aditi Singh",22,91),
+new Admin("Meera Pillai",38,"Accounts")
+];
+
+const [people,setPeople]=React.useState(initialData);
 const [form,setForm]=React.useState({name:"",age:"",role:"Student",extra:""});
 const [selected,setSelected]=React.useState(null);
 const [filter,setFilter]=React.useState("");
@@ -201,6 +209,7 @@ setForm({name:"",age:"",role:"Student",extra:""});
 
 const remove=(index)=>{
 setPeople(people.filter((_,i)=>i!==index));
+if(selected===people[index]) setSelected(null);
 };
 
 let filtered=[...people];
@@ -224,7 +233,6 @@ return(
 
 <div className="container">
 
-{/* LEFT PANEL */}
 <div className="panel">
 <h3>Add Person</h3>
 
@@ -269,7 +277,6 @@ onChange={e=>setForm({...form,extra:e.target.value})}
 
 </div>
 
-{/* CENTER GRID */}
 <div className="panel">
 
 <div className="stats">
@@ -299,7 +306,6 @@ Delete
 </div>
 </div>
 
-{/* RIGHT STRUCTURE PANEL */}
 <div className="panel">
 <h3>OOP Structure</h3>
 <div className="structure">
@@ -312,22 +318,16 @@ Person
  ├── Teacher
  └── Admin
 
-Polymorphism:
-introduce() overridden per class
+Concepts Demonstrated:
+• Inheritance
+• Method Overriding
+• Polymorphism (introduce())
+• Static Methods (role())
+• Getter Method (getAge())
+• Dynamic Object Creation
+• Role-based Rendering
 
-Encapsulation:
-Private attributes via constructor
-
-Static Method:
-role()
-
-Getter Method:
-getAge()
-
-Dynamic Rendering:
-Objects stored & rendered polymorphically
-
-Selected Object Output:
+Selected Output:
 ${selected.introduce()}
 ` : "Click a card to view structure details."}
 </div>
