@@ -1,283 +1,34 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8"/>
-<title>Advanced Product Dashboard</title>
+const generateProducts = () => {
 
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+return [
 
-<style>
-body{
-margin:0;
-font-family:Segoe UI;
-background:#0f172a;
-color:white;
-}
+/* ELECTRONICS */
+{ id:1, name:"iPhone 15 Pro", category:"Electronics", price:129999, rating:5, stock:12, discount:true, desc:"Apple A17 Pro chip, 256GB, Titanium build" },
+{ id:2, name:"Samsung Galaxy S24 Ultra", category:"Electronics", price:119999, rating:5, stock:10, discount:false, desc:"Snapdragon Gen 3, 200MP Camera" },
+{ id:3, name:"Sony WH-1000XM5", category:"Electronics", price:29999, rating:4, stock:18, discount:true, desc:"Industry-leading noise cancellation headphones" },
+{ id:4, name:"MacBook Air M3", category:"Electronics", price:139999, rating:5, stock:7, discount:false, desc:"13-inch, M3 chip, 16GB RAM" },
+{ id:5, name:"Dell XPS 15", category:"Electronics", price:154999, rating:4, stock:6, discount:false, desc:"Intel i9, RTX Graphics, 4K OLED" },
 
-header{
-padding:20px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-background:#111827;
-}
+/* CLOTHING */
+{ id:6, name:"Nike Air Zoom Pegasus", category:"Clothing", price:8999, rating:4, stock:25, discount:true, desc:"Lightweight performance running shoes" },
+{ id:7, name:"Adidas Ultraboost 23", category:"Clothing", price:11999, rating:5, stock:20, discount:false, desc:"Responsive cushioning running shoes" },
+{ id:8, name:"Levi's 511 Slim Jeans", category:"Clothing", price:3999, rating:4, stock:30, discount:false, desc:"Slim fit stretch denim" },
+{ id:9, name:"Zara Premium Jacket", category:"Clothing", price:6999, rating:4, stock:15, discount:true, desc:"Winter-ready minimalist design jacket" },
+{ id:10, name:"H&M Cotton Hoodie", category:"Clothing", price:2499, rating:3, stock:40, discount:false, desc:"Casual everyday comfort hoodie" },
 
-header h1{
-margin:0;
-font-size:22px;
-}
+/* BOOKS */
+{ id:11, name:"Atomic Habits", category:"Books", price:599, rating:5, stock:50, discount:false, desc:"James Clear's productivity bestseller" },
+{ id:12, name:"The Psychology of Money", category:"Books", price:499, rating:5, stock:45, discount:false, desc:"Morgan Housel financial wisdom" },
+{ id:13, name:"Clean Code", category:"Books", price:899, rating:5, stock:22, discount:true, desc:"Robert C. Martin software craftsmanship" },
+{ id:14, name:"The Pragmatic Programmer", category:"Books", price:999, rating:5, stock:20, discount:false, desc:"Modern software engineering guide" },
+{ id:15, name:"Deep Work", category:"Books", price:650, rating:4, stock:28, discount:false, desc:"Cal Newport focus mastery book" },
 
-.cart-badge{
-background:#ef4444;
-padding:5px 10px;
-border-radius:20px;
-}
+/* ACCESSORIES */
+{ id:16, name:"Apple Watch Series 9", category:"Accessories", price:42999, rating:5, stock:14, discount:true, desc:"Advanced health & fitness tracking" },
+{ id:17, name:"Fossil Gen 6 Smartwatch", category:"Accessories", price:22999, rating:4, stock:12, discount:false, desc:"WearOS powered premium smartwatch" },
+{ id:18, name:"Ray-Ban Aviator", category:"Accessories", price:7999, rating:4, stock:18, discount:false, desc:"Classic metal sunglasses" },
+{ id:19, name:"Samsonite Travel Backpack", category:"Accessories", price:5999, rating:4, stock:26, discount:false, desc:"Water-resistant professional backpack" },
+{ id:20, name:"Logitech MX Master 3S", category:"Accessories", price:9999, rating:5, stock:16, discount:true, desc:"Advanced productivity wireless mouse" }
 
-.container{
-display:grid;
-grid-template-columns:3fr 1fr;
-gap:20px;
-padding:20px;
-}
-
-.controls{
-display:flex;
-gap:10px;
-margin-bottom:20px;
-}
-
-input,select{
-padding:8px;
-border-radius:6px;
-border:none;
-}
-
-.products{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-gap:20px;
-}
-
-.card{
-background:#1e293b;
-padding:15px;
-border-radius:12px;
-transition:0.3s;
-position:relative;
-}
-
-.card:hover{
-transform:translateY(-5px);
-background:#334155;
-}
-
-.discount{
-position:absolute;
-top:10px;
-right:10px;
-background:#22c55e;
-padding:4px 8px;
-border-radius:6px;
-font-size:12px;
-}
-
-.card button{
-margin-top:10px;
-width:100%;
-padding:8px;
-background:#3b82f6;
-border:none;
-color:white;
-cursor:pointer;
-border-radius:6px;
-}
-
-.cart{
-background:#111827;
-padding:20px;
-border-radius:12px;
-position:sticky;
-top:20px;
-height:fit-content;
-}
-
-.cart-item{
-background:#1f2937;
-padding:10px;
-margin-bottom:10px;
-border-radius:8px;
-}
-
-.cart-item input{
-width:50px;
-}
-
-.summary{
-margin-top:15px;
-border-top:1px solid #374151;
-padding-top:10px;
-}
-
-.checkout{
-background:#22c55e;
-margin-top:10px;
-padding:8px;
-width:100%;
-border:none;
-cursor:pointer;
-border-radius:6px;
-}
-</style>
-</head>
-
-<body>
-<div id="root"></div>
-
-<script type="text/babel">
-
-function App(){
-
-const categories=["All","Electronics","Clothing","Books","Accessories"];
-
-const generateProducts=()=>{
-let arr=[];
-for(let i=1;i<=50;i++){
-arr.push({
-id:i,
-name:"Product "+i,
-price:500+Math.floor(Math.random()*2000),
-category:categories[Math.floor(Math.random()*4)+1],
-rating:Math.floor(Math.random()*5)+1,
-stock:5+Math.floor(Math.random()*10),
-discount:Math.random()>0.7
-});
-}
-return arr;
+];
 };
-
-const [products]=React.useState(generateProducts());
-const [search,setSearch]=React.useState("");
-const [category,setCategory]=React.useState("All");
-const [sort,setSort]=React.useState("");
-const [cart,setCart]=React.useState(
-JSON.parse(localStorage.getItem("cart"))||[]
-);
-
-React.useEffect(()=>{
-localStorage.setItem("cart",JSON.stringify(cart));
-},[cart]);
-
-const filtered=React.useMemo(()=>{
-let data=[...products];
-
-if(search)
-data=data.filter(p=>p.name.toLowerCase().includes(search.toLowerCase()));
-
-if(category!=="All")
-data=data.filter(p=>p.category===category);
-
-if(sort==="low")
-data.sort((a,b)=>a.price-b.price);
-if(sort==="high")
-data.sort((a,b)=>b.price-a.price);
-
-return data;
-},[search,category,sort,products]);
-
-const addToCart=(product)=>{
-setCart(prev=>{
-const existing=prev.find(p=>p.id===product.id);
-if(existing)
-return prev.map(p=>p.id===product.id?{...p,qty:p.qty+1}:p);
-return [...prev,{...product,qty:1}];
-});
-};
-
-const updateQty=(id,qty)=>{
-if(qty<1)return;
-setCart(cart.map(p=>p.id===id?{...p,qty:parseInt(qty)}:p));
-};
-
-const remove=id=>setCart(cart.filter(p=>p.id!==id));
-const clearCart=()=>setCart([]);
-
-const subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);
-const tax=subtotal*0.18;
-const delivery=subtotal>2000?0:100;
-const total=subtotal+tax+delivery;
-
-return(
-<>
-<header>
-<h1>Advanced Store</h1>
-<div className="cart-badge">Cart: {cart.length}</div>
-</header>
-
-<div className="container">
-
-<div>
-<div className="controls">
-<input placeholder="Search..." onChange={e=>setSearch(e.target.value)}/>
-<select onChange={e=>setCategory(e.target.value)}>
-{categories.map(c=><option key={c}>{c}</option>)}
-</select>
-<select onChange={e=>setSort(e.target.value)}>
-<option value="">Sort</option>
-<option value="low">Price Low-High</option>
-<option value="high">Price High-Low</option>
-</select>
-</div>
-
-<div className="products">
-{filtered.map(p=>(
-<div key={p.id} className="card">
-{p.discount && <div className="discount">SALE</div>}
-<h3>{p.name}</h3>
-<p>{p.category}</p>
-<p>₹{p.price}</p>
-<p>{"⭐".repeat(p.rating)}</p>
-<button onClick={()=>addToCart(p)}>Add</button>
-</div>
-))}
-</div>
-</div>
-
-<div className="cart">
-<h2>Cart</h2>
-
-{cart.map(item=>(
-<div key={item.id} className="cart-item">
-<strong>{item.name}</strong>
-<p>₹{item.price}</p>
-<input type="number" value={item.qty}
-onChange={e=>updateQty(item.id,e.target.value)}/>
-<button onClick={()=>remove(item.id)}>Remove</button>
-</div>
-))}
-
-<div className="summary">
-<p>Subtotal: ₹{subtotal.toFixed(2)}</p>
-<p>Tax (18%): ₹{tax.toFixed(2)}</p>
-<p>Delivery: ₹{delivery}</p>
-<h3>Total: ₹{total.toFixed(2)}</h3>
-<button className="checkout" onClick={()=>alert("Checkout Successful!")}>
-Checkout
-</button>
-<button onClick={clearCart}>Clear Cart</button>
-</div>
-
-</div>
-
-</div>
-</>
-);
-}
-
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
-
-</script>
-
-</body>
-</html>
